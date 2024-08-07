@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Wordle Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 50px;
+            transition: background-color 0.3s, color 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        body.light-mode {
+            background-color: white;
+            color: black;
+        }
+        body.dark-mode {
+            background-color: #636363;
+            color: rgb(255, 255, 255);
+        }
+        body.dark-mode .overlay-content {
+            color: black;
+        }
+        h1 {
+            color: inherit;
+            font-size: 36px;
+        }
+        p {
+            font-size: 18px;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            font-size: 18px;
+            width: 200px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .feedback {
+            font-size: 20px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .explanation {
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .correct {
+            background-color: rgb(0, 204, 0);
+            color: white;
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            line-height: 50px;
+            margin: 2px;
+            border-radius: 5px;
+        }
+        .partial {
+            background-color: rgb(252, 213, 63);
+            color: black;
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            line-height: 50px;
+            margin: 2px;
+            border-radius: 5px;
+        }
+        .wrong {
+            background-color: rgb(0, 0, 0);
+            color: white;
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            line-height: 50px;
+            margin: 2px;
+            border-radius: 5px;
+        }
+        .unused {
+            background-color: white;
+            color: black;
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            line-height: 50px;
+            margin: 2px;
+            border-radius: 5px;
+            border: 1px solid black;
+            cursor: pointer;
+        }
+        .theme-toggle {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 10px;
+            cursor: pointer;
+            background-color: #000000;
+            color: rgb(255, 255, 255);
+            border: none;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+        .remaining-letters {
+            margin-top: 20px;
+            font-size: 32px;
+            text-align: center;
+        }
+        .inline-item {
+            display: inline-block;
+        }
+
+        .button-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .dropbtn_icon {
+            font-family: 'Material Icons';
+        }
+        .dropbtn {
+            border: 1px solid rgb(37, 37, 37);
+            border-radius: 4px;
+            background-color: #f5f5f5;
+            font-weight: 400;
+            color: rgb(37, 37, 37);
+            padding: 12px;
+            width: 200px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            z-index: 1;
+            font-weight: 400;
+            background-color: #f9f9f9;
+            min-width: 200px;
+        }
+        .dropdown-content a {
+            display: block;
+            text-decoration: none;
+            color: rgb(37, 37, 37);
+            font-size: 12px;
+            padding: 12px 20px;
+        }
+        .dropdown-content a:hover {
+            background-color: #ececec;
+        }
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+        .game-instructions-button {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background-color: #1f35f8;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .game-instructions-button:hover {
+            background-color: #0300a5;
+        }
+
+        .reset-button {
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #f32e20;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .reset-button:hover {
+            background-color: #c01a1a;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .overlay-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 600px;
+            width: 80%;
+            text-align: center;
+        }
+
+        .close-button {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        .close-button:hover {
+            background-color: #d32f2f;
+        }
+
+        .grid-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .row {
+            display: flex;
+        }
+
+        .cell {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #d3d3d3;
+            margin: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                margin: 20px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+            p {
+                font-size: 16px;
+            }
+            input[type="text"] {
+                width: 100%;
+                font-size: 16px;
+            }
+            button {
+                font-size: 16px;
+                padding: 10px;
+            }
+            .feedback {
+                font-size: 18px;
+            }
+            .correct, .partial, .wrong, .unused {
+                width: 40px;
+                height: 40px;
+                line-height: 40px;
+                font-size: 18px;
+            }
+            .remaining-letters {
+                font-size: 24px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                margin: 10px;
+            }
+            h1 {
+                font-size: 20px;
+            }
+            p {
+                font-size: 14px;
+            }
+            input[type="text"] {
+                font-size: 14px;
+            }
+            button {
+                font-size: 14px;
+                padding: 8px;
+            }
+            .feedback {
+                font-size: 16px;
+            }
+            .correct, .partial, .wrong, .unused {
+                width: 30px;
+                height: 30px;
+                line-height: 30px;
+                font-size: 14px;
+            }
+            .remaining-letters {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body class="light-mode">
+    <h1>밀크 T Wordle Game</h1>
+    
+    <div class="dropdown">
+        <button class="dropbtn">
+          <span class="dropbtn_icon"></span>
+          밀크 T 초등 쏙쏙 Words 단어장
+        </button>
+        <div class="dropdown-content">
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="load_file" value="1">
+                <a onclick="document.getElementById('file_name').value='beyond'; this.closest('form').submit();">beyond(쏙쏙 words)</a>
+                <a onclick="document.getElementById('file_name').value='fly_1'; this.closest('form').submit();">fly 1</a>
+                <a onclick="document.getElementById('file_name').value='fly_2'; this.closest('form').submit();">fly 2</a>
+                <a onclick="document.getElementById('file_name').value='jump_1'; this.closest('form').submit();">jump 1</a>
+                <a onclick="document.getElementById('file_name').value='jump_2'; this.closest('form').submit();">jump 2</a>
+                <a onclick="document.getElementById('file_name').value='master_1'; this.closest('form').submit();">master 1</a>
+                <a onclick="document.getElementById('file_name').value='master_2'; this.closest('form').submit();">master 2</a>
+                <a onclick="document.getElementById('file_name').value='run'; this.closest('form').submit();">run</a>
+                <a onclick="document.getElementById('file_name').value='start'; this.closest('form').submit();">start</a>
+                <a onclick="document.getElementById('file_name').value='walk'; this.closest('form').submit();">walk</a>
+                <input type="hidden" id="file_name" name="file_name">
+            </form>
+        </div>
+    </div>
+
+    <button class="game-instructions-button" onclick="toggleOverlay()">게임방법</button>
+    
+    <p class="feedback">{{ message }}</p>
+
+    <p>남은 시도: {{ attempts }}</p>
+    <div class="button-container">
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" name="reset" class="reset-button">다시하기</button>
+        </form>&nbsp;&nbsp;
+        {% if not game_over %}
+        <form method="post">
+            {% csrf_token %}
+            <input type="text" id="guess-input" name="guess" maxlength="5" required>
+            &nbsp;
+            <button type="submit" name="submit">시도하기</button>
+        </form>
+        {% endif %}
+    </div>
+    
+    <div class="grid-container">
+        {% for guess in guesses %}
+        <div class="row">
+            {% for feedback in guess.feedback %}
+            <div class="cell {{ feedback.status }}">{{ feedback.char }}</div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+        {% for i in remaining_rows %}
+        <div class="row">
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="remaining-letters">
+        {% for letter, status in letter_status.items %}
+            <span class="{{ status }}" onclick="addLetter('{{ letter }}')">{{ letter }}</span>
+            {% if forloop.counter == 10 or forloop.counter == 19 %}<br>{% endif %}
+        {% endfor %}
+        <span class="unused" onclick="deleteLetter()">⌫</span>
+    </div>
+
+    <button class="theme-toggle" onclick="toggleTheme()">테마 변경</button>
+
+    <div class="overlay" id="overlay">
+        <div class="overlay-content">
+            <h2>게임 소개</h2>
+            밀크 T Wordle game은 밀크 T 초등 쏙쏙 Words 단어장을 기반으로 <br>학습자들이 게임을 통해 재미있게 영어 단어를 학습할 수 있도록 제작되었습니다.
+            <h2>게임 방법</h2>
+            <p>Wordle Game의 목표는 6번의 시도 안에 5글자 영단어를 맞추는 것입니다.</p>
+            <p>각 시도마다 아래와 같은 색으로 키보드에 피드백이 제공됩니다.</p>
+            <div class="inline-item">
+                <p>🟢 : 위치와 문자가 모두 일치</p>
+                <p>🟡 : 문자는 일치하나 위치가 다름</p>
+            </div>
+            <div class="inline-item">
+                <p>⚫ : 문자가 일치하지 않음</p>
+                <p>⬜ : 아직 입력해보지 않은 알파벳</p>
+            </div>
+            <p>게임 시작 전 밀크 T 초등 쏙쏙 Words에서 원하는 단어장을 선택해주세요.</p>
+            <p>단어 목록은 밀크 T 초등 쏙쏙 Words의 단어장에서 
+                <br>5개의 알파벳만을 사용하는 단어들 입니다.</p>
+            <p>테마 변경을 통해 어두운 화면으로 변경 가능합니다.</p>
+            <button class="close-button" onclick="toggleOverlay()">닫기</button>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const body = document.body;
+            body.classList.toggle('light-mode');
+            body.classList.toggle('dark-mode');
+            const theme = body.classList.contains('dark-mode') ? 'dark' : 'light';
+            localStorage.setItem('theme', theme);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.body.classList.remove('light-mode', 'dark-mode');
+            document.body.classList.add(savedTheme + '-mode');
+        });
+
+        function addLetter(letter) {
+            const input = document.getElementById('guess-input');
+            if (input.value.length < 5) {    
+                input.value += letter;
+            }
+        }
+
+        function deleteLetter() {
+            const input = document.getElementById('guess-input');
+            input.value = input.value.slice(0, -1);
+        }
+
+        function toggleOverlay() {
+            const overlay = document.getElementById('overlay');
+            overlay.style.display = (overlay.style.display === 'flex') ? 'none' : 'flex';
+        }
+    </script>
+</body>
+</html>

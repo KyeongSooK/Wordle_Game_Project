@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Wordle 게임 결과</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 50px;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        p {
+            font-size: 18px;
+        }
+        .guess-list {
+            margin-top: 20px;
+        }
+        .guess-item {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        .correct, .partial, .wrong {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            line-height: 30px;
+            margin: 2px;
+            border-radius: 5px;
+        }
+        .correct {
+            background-color: green;
+            color: white;
+        }
+        .partial {
+            background-color: yellow;
+            color: black;
+        }
+        .wrong {
+            background-color: black;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{ '축하합니다! 이겼습니다!' if won else '게임 오버!' }}</h1>
+    <p>정답은: <strong>{{ word }}</strong></p>
+    <div class="guess-list">
+        {% for guess in guesses %}
+            <p class="guess-item">{{ guess.feedback|safe }}</p>
+        {% endfor %}
+    </div>
+    <form method="post" action="{% url 'index' %}">
+        {% csrf_token %}
+        <button type="submit" name="reset">다시하기</button>
+    </form>
+</body>
+</html>
